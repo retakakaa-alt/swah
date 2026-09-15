@@ -1,0 +1,2 @@
+# swah
+kura kanji
