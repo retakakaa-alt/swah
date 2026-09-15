@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animasi Urutan Goresan Kanji</title>
+    <style>
+        body {
+            margin: 0;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        svg {
+            width: 340px;
+            height: 340px;
+        }
+
+        .stroke {
+            fill: none;
+            stroke-width: 9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        #p1 { stroke: #000000; }
+        #p2 { stroke: #000000; }
+        #p3 { stroke: #000000; }
+        #p4 { stroke: #000000; }
+        #p5 { stroke: #000000; }
+
+        .num {
+            font-size: 11px;
+            font-weight: bold;
+            fill: #888888;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<svg viewBox="0 0 200 200">
+
+    <!-- Semua path -->
+
+    <!-- 1: vertikal kiri, dari atas ke bawah -->
+    <path id="p1" class="stroke" d="M40,20 L40,160"/>
+
+    <!-- 2: horizontal atas kanan + lengkung kanan + turun -->
+    <path id="p2" class="stroke" d="M40,20 L165,20 Q178,20 178,33 L178,160"/>
+
+    <!-- 3: vertikal tengah, dari atas ke bawah -->
+    <path id="p3" class="stroke" d="M109,20 L109,160"/>
+
+    <!-- 4: horizontal tengah -->
+    <path id="p4" class="stroke" d="M40,95 L178,95"/>
+
+    <!-- 5: horizontal bawah -->
+    <path id="p5" class="stroke" d="M40,160 L178,160"/>
+
+    <!-- Nomor di layer atas, di area putih dekat titik awal -->
+    <!-- 1: titik awal M40,20 → kiri luar -->
+    <text id="n1" class="num" x="22" y="24">1</text>
+
+    <!-- 2: titik awal M40,20 (lanjutan dari pojok kiri atas) → atas kanan titik awal -->
+    <text id="n2" class="num" x="43" y="14">2</text>
+
+    <!-- 3: titik awal M109,20 → atas, sedikit kanan -->
+    <text id="n3" class="num" x="113" y="14">3</text>
+
+    <!-- 4: titik awal M40,95 → kiri luar, sejajar garis -->
+    <text id="n4" class="num" x="22" y="99">4</text>
+
+    <!-- 5: titik awal M40,160 → kiri bawah titik awal -->
+    <text id="n5" class="num" x="22" y="158">5</text>
+
+</svg>
+
+<script>
+    const strokes = [
+        { path: document.getElementById('p1'), num: document.getElementById('n1') },
+        { path: document.getElementById('p2'), num: document.getElementById('n2') },
+        { path: document.getElementById('p3'), num: document.getElementById('n3') },
+        { path: document.getElementById('p4'), num: document.getElementById('n4') },
+        { path: document.getElementById('p5'), num: document.getElementById('n5') },
+    ];
+
+    const DRAW_DURATION = 600;   // ms per goresan
+    const PAUSE_AFTER   = 500;   // ms jeda antar goresan
+    const HOLD_DURATION = 1500;  // ms tahan setelah semua selesai
+
+    function reset() {
+        strokes.forEach(s => {
+            const len = s.path.getTotalLength();
+            s.path.style.transition = 'none';
+            s.path.style.strokeDasharray = len;
+            s.path.style.strokeDashoffset = len;
+            s.num.style.opacity = 0;
+        });
+    }
+
+    function drawStroke(s) {
+        return new Promise(resolve => {
+            s.num.style.opacity = 1;
+            s.path.style.transition = `stroke-dashoffset ${DRAW_DURATION}ms ease`;
+            s.path.style.strokeDashoffset = 0;
+            setTimeout(resolve, DRAW_DURATION + PAUSE_AFTER);
+        });
+    }
+
+    async function loop() {
+        while (true) {
+            reset();
+            await new Promise(r => setTimeout(r, 200));
+
+            for (const s of strokes) {
+                await drawStroke(s);
+            }
+
+            await new Promise(r => setTimeout(r, HOLD_DURATION));
+        }
+    }
+
+    loop();
+</script>
+
+</body>
+</html>
